@@ -5,18 +5,20 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.geekbrains.tests.R
+import com.geekbrains.tests.databinding.ActivityDetailsBinding
 import com.geekbrains.tests.presenter.details.DetailsPresenter
 import com.geekbrains.tests.presenter.details.PresenterDetailsContract
-import kotlinx.android.synthetic.main.activity_details.*
 import java.util.*
 
 class DetailsActivity : AppCompatActivity(), ViewDetailsContract {
 
-    private val presenter: PresenterDetailsContract = DetailsPresenter(this)
+    private val presenter: PresenterDetailsContract = DetailsPresenter()
+    private val binding by lazy { ActivityDetailsBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_details)
+        setContentView(binding.root)
+        presenter.onAttach(this)
         setUI()
     }
 
@@ -24,8 +26,8 @@ class DetailsActivity : AppCompatActivity(), ViewDetailsContract {
         val count = intent.getIntExtra(TOTAL_COUNT_EXTRA, 0)
         presenter.setCounter(count)
         setCountText(count)
-        decrementButton.setOnClickListener { presenter.onDecrement() }
-        incrementButton.setOnClickListener { presenter.onIncrement() }
+        binding.decrementButton.setOnClickListener { presenter.onDecrement() }
+        binding.incrementButton.setOnClickListener { presenter.onIncrement() }
     }
 
     override fun setCount(count: Int) {
@@ -33,7 +35,7 @@ class DetailsActivity : AppCompatActivity(), ViewDetailsContract {
     }
 
     private fun setCountText(count: Int) {
-        totalCountTextView.text =
+        binding.totalCountTextView.text =
             String.format(Locale.getDefault(), getString(R.string.results_count), count)
     }
 
@@ -46,5 +48,10 @@ class DetailsActivity : AppCompatActivity(), ViewDetailsContract {
                 putExtra(TOTAL_COUNT_EXTRA, totalCount)
             }
         }
+    }
+
+    override fun onDestroy() {
+        presenter.onDetach()
+        super.onDestroy()
     }
 }
